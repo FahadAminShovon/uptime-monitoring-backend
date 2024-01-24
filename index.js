@@ -11,6 +11,8 @@ const server = http.createServer(function (req, res) {
 
   const queryStringObject = parsedUrl.query;
 
+  const headers = req.headers;
+
   // Get the http method
   const method = req.method.toLowerCase();
 
@@ -22,6 +24,8 @@ const server = http.createServer(function (req, res) {
     `Request received on path: ${trimmedPath} with method: ${method} with parameters`,
     JSON.stringify(queryStringObject)
   );
+
+  console.log('Request received with these headers', headers);
 });
 
 server.listen(3000, function () {
