@@ -27,18 +27,51 @@ const server = http.createServer(function (req, res) {
 
   req.on('end', function () {
     // Send response
-    res.end('Hello world\n');
+    buffer += decoder.end();
 
-    // log what path the user was asking for
-    console.log(
-      `Request received on path: ${trimmedPath} with method: ${method} with parameters 
-      ${JSON.stringify(queryStringObject)} with payload ${buffer}`
-    );
+    // Choose the handler the request should go to, If one is not found use the notFound handler
+    const chosenHandler =
+      typeof routes[trimmedPath] !== undefined
+        ? routes[trimmedPath]
+        : routes.notFound;
 
-    console.log('Request received with these headers', headers);
+    const data = {
+      trimmedPath,
+      headers,
+      method,
+      payload: buffer,
+      queryStringObject,
+    };
+
+    chosenHandler(data, function (statusCode, payload) {
+      statusCode = typeof statusCode === 'number' ? statusCode : 200;
+      payload = typeof payload === 'object' ? payload : {};
+      const payloadString = JSON.stringify(payload);
+
+      res.writeHead(statusCode);
+      res.end(payloadString);
+
+      // log what path the user was asking for
+      console.log('Returning this response', statusCode, payloadString);
+    });
   });
 });
 
 server.listen(3000, function () {
   console.log('The server is listening on port 3000 now');
 });
+
+const handlers = {};
+
+handlers.sample = function (data, callback) {
+  callback(406, { name: 'Sample handler' });
+};
+
+handlers.notFound = function (data, callback) {
+  callback(404);
+};
+
+const routes = {
+  sample: handlers.sample,
+  notFound: handlers.notFound,
+};
