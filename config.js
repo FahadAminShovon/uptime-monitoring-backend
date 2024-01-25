@@ -8,12 +8,14 @@ const envrionments = {};
 
 envrionments.staging = {
   envName: 'staging',
-  port: 3000,
+  httpPort: 3000,
+  httpsPort: 3001,
 };
 
 envrionments.production = {
   envName: 'production',
-  port: 5000,
+  httpPort: 5000,
+  httpsPort: 5001,
 };
 
 const currentEnv =
@@ -23,7 +25,5 @@ const envToExport =
   typeof envrionments[currentEnv] == 'object'
     ? envrionments[currentEnv]
     : envrionments.staging;
-
-console.log('log', envToExport);
 
 module.exports = envToExport;
