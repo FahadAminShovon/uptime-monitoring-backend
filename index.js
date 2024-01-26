@@ -3,7 +3,9 @@ const https = require('https');
 const url = require('url');
 const StringDecoder = require('string_decoder').StringDecoder;
 const fs = require('fs');
-const config = require('./config');
+const config = require('./lib/config');
+const handlers = require('./lib/handlers');
+const helpers = require('./lib/helpers');
 
 const httpServer = http.createServer(function (req, res) {
   unifiedFunction(req, res);
@@ -57,7 +59,7 @@ function unifiedFunction(req, res) {
 
     // Choose the handler the request should go to, If one is not found use the notFound handler
     const chosenHandler =
-      typeof routes[trimmedPath] !== undefined
+      typeof routes[trimmedPath] !== 'undefined'
         ? routes[trimmedPath]
         : routes.notFound;
 
@@ -65,7 +67,7 @@ function unifiedFunction(req, res) {
       trimmedPath,
       headers,
       method,
-      payload: buffer,
+      payload: helpers.parseJsonToObject(buffer),
       queryStringObject,
     };
 
@@ -73,28 +75,18 @@ function unifiedFunction(req, res) {
       statusCode = typeof statusCode === 'number' ? statusCode : 200;
       payload = typeof payload === 'object' ? payload : {};
       const payloadString = JSON.stringify(payload);
-
+      // Return the response
       res.setHeader('Content-Type', 'application/json');
       res.writeHead(statusCode);
       res.end(payloadString);
-
       // log what path the user was asking for
       console.log('Returning this response', statusCode, payloadString);
     });
   });
 }
 
-const handlers = {};
-
-handlers.ping = function (data, callback) {
-  callback(200);
-};
-
-handlers.notFound = function (data, callback) {
-  callback(404);
-};
-
 const routes = {
   ping: handlers.ping,
   notFound: handlers.notFound,
+  users: handlers.users,
 };
