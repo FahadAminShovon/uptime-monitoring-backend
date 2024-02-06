@@ -1,94 +1,20 @@
-const http = require('http');
-const https = require('https');
-const url = require('url');
-const StringDecoder = require('string_decoder').StringDecoder;
-const fs = require('fs');
-const config = require('./lib/config');
-const handlers = require('./lib/handlers');
-const helpers = require('./lib/helpers');
+// Dependencies
+const server = require('./lib/server');
+const workers = require('./lib/workers');
 
-const httpServer = http.createServer(function (req, res) {
-  unifiedFunction(req, res);
-});
+// Declare the app
+const app = {};
 
-const httpsServerOptions = {
-  key: fs.readFileSync('./https/key.pem'),
-  cert: fs.readFileSync('./https/cert.pem'),
+// Init function
+
+app.init = function () {
+  // Start the server
+  server.init();
+  // Start the workers
+  workers.init();
 };
 
-const httpsServer = https.createServer(httpsServerOptions, function (req, res) {
-  unifiedFunction(req, res);
-});
+// Execute
+app.init();
 
-httpServer.listen(config.httpPort, function () {
-  console.log(`The httpServer is listening on httpPort ${config.httpPort} now`);
-});
-
-httpsServer.listen(config.httpsPort, function () {
-  console.log(
-    `The httpServer is listening on httpPort ${config.httpsPort} now`
-  );
-});
-
-function unifiedFunction(req, res) {
-  // Get the url and parse it
-  const parsedUrl = url.parse(req.url, true);
-
-  // Get the path from the url
-  const path = parsedUrl.pathname;
-  var trimmedPath = path.replace(/^\/+|\/+$/g, '');
-
-  const queryStringObject = parsedUrl.query;
-
-  // Get the http method
-  const method = req.method.toLowerCase();
-
-  const headers = req.headers;
-
-  // Get payloads if there is any
-  const decoder = new StringDecoder('utf-8');
-  let buffer = '';
-
-  req.on('data', function (data) {
-    buffer += decoder.write(data);
-  });
-
-  req.on('end', function () {
-    // Send response
-    buffer += decoder.end();
-
-    // Choose the handler the request should go to, If one is not found use the notFound handler
-    const chosenHandler =
-      typeof routes[trimmedPath] !== 'undefined'
-        ? routes[trimmedPath]
-        : routes.notFound;
-
-    const data = {
-      trimmedPath,
-      headers,
-      method,
-      payload: helpers.parseJsonToObject(buffer),
-      queryStringObject,
-    };
-
-    chosenHandler(data, function (statusCode, payload) {
-      statusCode = typeof statusCode === 'number' ? statusCode : 200;
-      payload = typeof payload === 'object' ? payload : {};
-      const payloadString = JSON.stringify(payload);
-      // Return the response
-      res.setHeader('Content-Type', 'application/json');
-      res.writeHead(statusCode);
-      res.end(payloadString);
-      // log what path the user was asking for
-      console.log('Returning this response', statusCode, payloadString);
-    });
-  });
-}
-
-const routes = {
-  ping: handlers.ping,
-  notFound: handlers.notFound,
-  users: handlers.users,
-  tokens: handlers.tokens,
-  checks: handlers.checks,
-};
+module.exports = app;
