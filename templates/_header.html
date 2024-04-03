@@ -1,18 +1,20 @@
 <html>
   <head>
+
     <!-- General Settings -->
-    <meta charset="utf-8" />
-    <meta http-equiv="content-language" content="en-us" />
+    <meta charset="utf-8">
+    <meta http-equiv="content-language" content="en-us">
     <base href="{global.baseUrl}" />
 
     <!-- Meta Tags -->
     <title>{head.title} | {global.appName}</title>
-    <meta name="description" content="{head.description}" />
+    <meta name="description" content="{head.description}">
 
     <!-- Static Assets -->
-    <link type="image/x-icon" rel="icon" href="favicon.ico" />
+    <link type="image/x-icon" rel="icon" href="favicon.ico">
     <script type="text/javascript" charset="utf-8" src="public/app.js"></script>
     <link rel="stylesheet" type="text/css" href="public/app.css" />
+
   </head>
   <body class="{body.class}">
     <!-- Page Wrapper -->
@@ -21,8 +23,8 @@
       <div class="header">
         <!-- Logo -->
         <a class="logo" href="/">
-					<img src="public/logo.png"/>
-				</a>
+          <img src="public/logo.png" alt="Logo" />
+        </a>
         <!-- Navigation -->
         <ul class="menu">
           <li>
@@ -41,9 +43,11 @@
             <a href="/account/edit">Account Settings</a>
           </li>
           <li class="loggedIn">
-            <a href="#">Logout</a>
+            <a href="#" id="logoutButton">Logout</a>
           </li>
         </ul>
+
+        <div class="clear"></div>
       </div>
 
       <!-- Page-Specific Content -->
